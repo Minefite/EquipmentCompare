@@ -9,8 +9,8 @@ import net.minecraftforge.fml.common.Mod;
 @Mod(EquipmentCompare.MODID)
 public final class EquipmentCompareForge
 {
-	public EquipmentCompareForge()
+	public EquipmentCompareForge(ModLoadingContext context)
 	{
-		ModLoadingContext.get().registerExtensionPoint(IExtensionPoint.DisplayTest.class, () -> new IExtensionPoint.DisplayTest(() -> "ANY", (remote, isServer) -> true));
+		context.registerExtensionPoint(IExtensionPoint.DisplayTest.class, () -> new IExtensionPoint.DisplayTest(() -> "ANY", (remote, isServer) -> true));
 	}
 }

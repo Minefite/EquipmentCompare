@@ -21,7 +21,10 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipPositioner;
+import net.minecraft.client.gui.screens.inventory.tooltip.TooltipRenderUtil;
 import net.minecraft.client.renderer.Rect2i;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
@@ -73,7 +76,7 @@ public class ComparisonTooltips
 			}
 
 			poseStack.pushPose();
-			poseStack.translate(rect.getX(), rect.getY(), 401);
+			poseStack.translate(rect.getX(), rect.getY(), 400);
 
 			Matrix4f matrix = poseStack.last().pose();
 
@@ -84,41 +87,80 @@ public class ComparisonTooltips
 			if (Services.getPlatformHelper().isModLoaded("legendarytooltips"))
 			{
 				bgColor = DEFAULT_BACKGROUND_COLOR;
+				int bgColorEnd = DEFAULT_BACKGROUND_COLOR;
+				boolean gradientBackground = false, gradientBorder = false;
 
-				// Fire a color event to properly update the background color if needed.
-				ColorExtResult colorResult = RenderTooltipEvents.COLOREXT.invoker().onColor(itemStack, graphics, rect.getX(), rect.getY(), font, bgColor, bgColor, borderStartColor, borderEndColor, tooltipLines, showBadge, index);
+				// Fire a color event to properly update the colors if needed.
+				ColorExtResult colorResult = RenderTooltipEvents.COLOREXT.invoker().onColor(itemStack, graphics, rect.getX(), rect.getY(), font, bgColor, bgColorEnd, borderStartColor, borderEndColor, tooltipLines, false, index, itemStack.get(DataComponents.TOOLTIP_STYLE), gradientBackground, gradientBorder);
 				if (colorResult != null)
 				{
 					bgColor = colorResult.backgroundStart();
+					bgColorEnd = colorResult.backgroundEnd();
+					borderStartColor = colorResult.borderStart();
+					borderEndColor = colorResult.borderEnd();
+					gradientBackground = colorResult.gradientBackground();
+					gradientBorder = colorResult.gradientBorder();
 				}
 
 				constrainToRect = true;
 				badgeOffset = 6;
-				
-				GuiHelper.drawGradientRect(matrix, -1, 1,					-17 + badgeOffset, rect.getWidth() + 7, -16 + badgeOffset, bgColor, bgColor);
-				GuiHelper.drawGradientRect(matrix, -1, 0,					-16 + badgeOffset, 1, 					-5 + badgeOffset,  bgColor, bgColor);
-				GuiHelper.drawGradientRect(matrix, -1, rect.getWidth() + 7,	-16 + badgeOffset, rect.getWidth() + 8,	-5 + badgeOffset,  bgColor, bgColor);
-				GuiHelper.drawGradientRect(matrix, -1, 1,					-16 + badgeOffset, rect.getWidth() + 7, -6 + badgeOffset,  bgColor, bgColor);
+
+				// If either gradientBackground or gradientBorder is false here, we need to manually render that component to fill the badge area above the tooltip as well.
+				if (!gradientBackground)
+				{
+					// Render the background resource.
+					graphics.blitSprite(RenderType::guiTextured, TooltipRenderUtil.getBackgroundSprite(itemStack.get(DataComponents.TOOLTIP_STYLE)), rect.getX() - 12, rect.getY() - 12 - 17 + badgeOffset, rect.getWidth() + 24 + 8, rect.getHeight() + 24 + 17 + 8);
+				}
+				else
+				{
+					poseStack.pushPose();
+					poseStack.translate(0.0f, 0.0f, -400);
+					Tooltips.renderGradientBackground(graphics, 4, -14 + badgeOffset, rect.getWidth(), rect.getHeight() + 12, 400, bgColor, bgColorEnd);
+					poseStack.popPose();
+				}
+
+				if (!gradientBorder)
+				{
+					// Render the border resource.
+					graphics.blitSprite(RenderType::guiTextured, TooltipRenderUtil.getFrameSprite(itemStack.get(DataComponents.TOOLTIP_STYLE)), rect.getX() - 12, rect.getY() - 12 - 17 + badgeOffset, rect.getWidth() + 24 + 8, rect.getHeight() + 24 + 17 + 8);
+				}
+				else
+				{
+					poseStack.pushPose();
+					poseStack.translate(0.0f, 0.0f, -400);
+					Tooltips.renderGradientBorder(graphics, 4, -14 + badgeOffset, rect.getWidth(), rect.getHeight() + 12, 400, borderStartColor, borderEndColor);
+					poseStack.popPose();
+				}
+
+				poseStack.popPose();
+				Tooltips.renderItemTooltip(itemStack, new Tooltips.TooltipInfo(tooltipLines, font, Tooltips.calculateTitleLines(tooltipLines)), rect, screen.width, screen.height, DEFAULT_BACKGROUND_COLOR, DEFAULT_BACKGROUND_COLOR, DEFAULT_BORDER_COLOR_START, DEFAULT_BORDER_COLOR_END, graphics, positioner, true, constrainToRect, centeredTitle, index, null, true, true);
 			}
 			else
 			{
 				GuiHelper.drawGradientRect(matrix, -1, 1,					-17 + badgeOffset, rect.getWidth() + 7, -16 + badgeOffset, bgColor, bgColor);
-				GuiHelper.drawGradientRect(matrix, -1, 0,					-16 + badgeOffset, 1, 					-4 + badgeOffset,  bgColor, bgColor);
-				GuiHelper.drawGradientRect(matrix, -1, rect.getWidth() + 7,	-16 + badgeOffset, rect.getWidth() + 8,	-4 + badgeOffset,  bgColor, bgColor);
-				GuiHelper.drawGradientRect(matrix, -1, 1,					-4 + badgeOffset,  rect.getWidth() + 7, -3 + badgeOffset,  bgColor, bgColor);
-				GuiHelper.drawGradientRect(matrix, -1, 1,					-16 + badgeOffset, rect.getWidth() + 7, -4 + badgeOffset,  bgColor, bgColor);
-				GuiHelper.drawGradientRect(matrix, -1, 1,					-15 + badgeOffset, 2, 					-5 + badgeOffset,  borderStartColor, borderEndColor);
-				GuiHelper.drawGradientRect(matrix, -1, rect.getWidth() + 6,	-15 + badgeOffset, rect.getWidth() + 7, -5 + badgeOffset,  borderStartColor, borderEndColor);
+				GuiHelper.drawGradientRect(matrix, -1, 0,					-16 + badgeOffset, 1,					 -4 + badgeOffset, bgColor, bgColor);
+				GuiHelper.drawGradientRect(matrix, -1, rect.getWidth() + 7,	-16 + badgeOffset, rect.getWidth() + 8,  -4 + badgeOffset, bgColor, bgColor);
+				GuiHelper.drawGradientRect(matrix, -1, 1,					 -4 + badgeOffset,  rect.getWidth() + 7, -3 + badgeOffset, bgColor, bgColor);
+				GuiHelper.drawGradientRect(matrix, -1, 1,					-16 + badgeOffset, rect.getWidth() + 7,  -4 + badgeOffset, bgColor, bgColor);
+				GuiHelper.drawGradientRect(matrix, -1, 1,					-15 + badgeOffset, 2,					 -5 + badgeOffset, borderStartColor, borderEndColor);
+				GuiHelper.drawGradientRect(matrix, -1, rect.getWidth() + 6,	-15 + badgeOffset, rect.getWidth() + 7,  -5 + badgeOffset, borderStartColor, borderEndColor);
 				GuiHelper.drawGradientRect(matrix, -1, 1,					-16 + badgeOffset, rect.getWidth() + 7, -15 + badgeOffset, borderStartColor, borderStartColor);
-				GuiHelper.drawGradientRect(matrix, -1, 1,					-5 + badgeOffset,  rect.getWidth() + 7, -4 + badgeOffset,  borderEndColor,   borderEndColor);
+				GuiHelper.drawGradientRect(matrix, -1, 1,					 -5 + badgeOffset,  rect.getWidth() + 7, -4 + badgeOffset, borderEndColor,   borderEndColor);
+				
+				poseStack.popPose();
+				Tooltips.renderItemTooltip(itemStack, new Tooltips.TooltipInfo(tooltipLines, font, Tooltips.calculateTitleLines(tooltipLines)), rect, screen.width, screen.height, DEFAULT_BACKGROUND_COLOR, DEFAULT_BACKGROUND_COLOR, DEFAULT_BORDER_COLOR_START, DEFAULT_BORDER_COLOR_END, graphics, positioner, true, constrainToRect, centeredTitle, index);
 			}
 
+			poseStack.pushPose();
+			poseStack.translate(rect.getX(), rect.getY(), 401);
 			graphics.drawCenteredString(font, equippedBadge, rect.getWidth() / 2 + 4, badgeOffset - 14, -1);
 
 			poseStack.popPose();
 		}
-
-		Tooltips.renderItemTooltip(itemStack, new Tooltips.TooltipInfo(tooltipLines, font, Tooltips.calculateTitleLines(tooltipLines)), rect, screen.width, screen.height, DEFAULT_BACKGROUND_COLOR, DEFAULT_BACKGROUND_COLOR, DEFAULT_BORDER_COLOR_START, DEFAULT_BORDER_COLOR_END, graphics, positioner, showBadge, constrainToRect, centeredTitle, index);
+		else
+		{
+			Tooltips.renderItemTooltip(itemStack, new Tooltips.TooltipInfo(tooltipLines, font, Tooltips.calculateTitleLines(tooltipLines)), rect, screen.width, screen.height, DEFAULT_BACKGROUND_COLOR, DEFAULT_BACKGROUND_COLOR, DEFAULT_BORDER_COLOR_START, DEFAULT_BORDER_COLOR_END, graphics, positioner, false, constrainToRect, centeredTitle, index);
+		}
 	}
 
 	@SuppressWarnings("unchecked")

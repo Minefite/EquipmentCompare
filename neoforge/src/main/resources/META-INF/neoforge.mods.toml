@@ -22,21 +22,21 @@ description='''Adds additional tooltips when hovering over equipment for easy co
 [[dependencies.equipmentcompare]]
 	modId="minecraft"
 	type="required"
-	versionRange="[1.21,)"
+	versionRange="[1.21.3,)"
 	ordering="NONE"
 	side="BOTH"
 
 [[dependencies.equipmentcompare]]
 	modId="iceberg"
 	type="required"
-	versionRange="[1.2.3,)"
+	versionRange="[1.2.10,)"
 	ordering="AFTER"
 	side="BOTH"
 
 [[dependencies.equipmentcompare]]
 	modId="legendarytooltips"
 	type="optional"
-	versionRange="[1.4.7,)"
+	versionRange="[1.5.0,)"
 	ordering="NONE"
 	side="BOTH"
 
