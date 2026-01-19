@@ -1,5 +1,5 @@
 plugins {
-	id 'io.github.goooler.shadow'
+	id 'com.github.johnrengelman.shadow'
 }
 
 architectury {
@@ -31,6 +31,7 @@ configurations {
 dependencies {
 	modImplementation "net.fabricmc:fabric-loader:$rootProject.fabricLoaderVersion"
 	modImplementation "net.fabricmc.fabric-api:fabric-api:$rootProject.fabricVersion"
+	modImplementation "dev.architectury:architectury-fabric:$rootProject.architecturyVersion"
 
 	modImplementation "curse.maven:roughlyenoughitems-310111:4622769"
 	modImplementation "curse.maven:justenoughitems-238222:5563690"

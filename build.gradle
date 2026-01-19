@@ -1,49 +1,8 @@
-buildscript {
-	repositories {
-		flatDir {
-			dirs '../architectury-loom/build/libs'
-			dirs '../architectury-plugin/build/libs'
-		}
-		mavenCentral()
-	}
-	dependencies {
-		classpath name: 'architectury-loom-1.7.9999'
-		classpath "org.ow2.asm:asm:9.6"
-		classpath "org.ow2.asm:asm-analysis:9.6"
-		classpath "org.ow2.asm:asm-commons:9.6"
-		classpath "org.ow2.asm:asm-tree:9.6"
-		classpath "org.ow2.asm:asm-util:9.6"
-		classpath "commons-io:commons-io:2.15.1"
-		classpath "com.google.code.gson:gson:2.10.1"
-		classpath "com.google.guava:guava:33.0.0-jre"
-		classpath "net.fabricmc:stitch:0.6.2"
-		classpath "net.fabricmc:tiny-remapper:0.10.3"
-		classpath "net.fabricmc:access-widener:2.1.0"
-		classpath "net.fabricmc:mapping-io:0.6.1"
-		classpath "net.fabricmc:lorenz-tiny:4.0.2"
-		classpath "dev.architectury:mercury:0.1.4.17"
-		classpath "net.fabricmc:fabric-loom-native:0.2.0"
-		classpath "org.jetbrains.kotlinx:kotlinx-metadata-jvm:0.9.0"
-		classpath "net.minecraftforge:installertools:1.2.0"
-		classpath "org.cadixdev:lorenz:0.5.3"
-		classpath "de.oceanlabs.mcp:mcinjector:3.8.0"
-		classpath "com.opencsv:opencsv:5.4"
-		classpath "net.minecraftforge:DiffPatch:2.0.7"
-		classpath "com.electronwill.night-config:toml:3.6.6"
-		classpath "com.mojang:datafixerupper:6.0.8"
-		classpath "dev.architectury:at:1.0.1"
-
-		classpath name: 'architectury-plugin-3.4.9999'
-		classpath "dev.architectury:architectury-transformer:5.2.86"
-		classpath "gradle.plugin.org.jetbrains.gradle.plugin.idea-ext:gradle-idea-ext:0.10"
-	}
-}
-
 plugins {
-	id 'io.github.goooler.shadow' version '8.1.7' apply false
+	id 'dev.architectury.loom' version '1.13-SNAPSHOT' apply false
+	id 'architectury-plugin' version '3.4-SNAPSHOT'
+	id 'com.github.johnrengelman.shadow' version '8.1.1' apply false
 }
-
-apply plugin: 'architectury-plugin'
 
 architectury {
 	minecraft = project.minecraftVersion
@@ -71,14 +30,26 @@ subprojects {
 			name = "LadySnake"
 			url = 'https://maven.ladysnake.org/releases'
 		}
+		exclusiveContent {
+			forRepository {
+				maven {
+					name = "Modrinth"
+					url = "https://api.modrinth.com/maven"
+				}
+			}
+			filter {
+				includeGroup "maven.modrinth"
+			}
+		}
 	}
 
 	dependencies {
 		minecraft "net.minecraft:minecraft:$rootProject.minecraftVersion"
 		mappings loom.officialMojangMappings()
 
-		modImplementation files("../libs/Iceberg-1.21.3-common-1.2.10.jar")
-		modImplementation files("../libs/LegendaryTooltips-1.21.3-common-1.5.0.jar")
+		modImplementation("maven.modrinth:iceberg:1.2.10")
+		modImplementation("maven.modrinth:legendary-tooltips:1.5.0")
+		modImplementation("maven.modrinth:prism-lib:1.0.10")
 		modImplementation "curse.maven:adorned-1036809:5515068"
 		modImplementation "curse.maven:accessories-938917:5576244"
 		modImplementation "curse.maven:accessoriestrinkets-1005680:5575593"
@@ -87,15 +58,16 @@ subprojects {
 	}
 
 	java {
+		// Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
+		// if it is present.
+		// If you remove this line, sources will not be generated.
+		withSourcesJar()
+
 		sourceCompatibility = JavaVersion.VERSION_21
 		targetCompatibility = JavaVersion.VERSION_21
 	}
 
 	tasks.withType(JavaCompile).configureEach {
 		it.options.release = 21
-	}
-
-	remapJar {
-		destinationDirectory = file("$buildDir/../../output")
 	}
 }

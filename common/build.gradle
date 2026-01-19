@@ -2,7 +2,6 @@ architectury {
 	common {
 		clear()
 		add(rootProject.enabledPlatforms.split(','))
-		forgeUsesMojangMappings = true
 	}
 }
 
@@ -18,4 +17,5 @@ dependencies {
 	// which get remapped to the correct annotations on each platform.
 	// Do NOT use other classes from Fabric Loader.
 	modImplementation "net.fabricmc:fabric-loader:$rootProject.fabricLoaderVersion"
+	modImplementation "dev.architectury:architectury:$rootProject.architecturyVersion"
 }

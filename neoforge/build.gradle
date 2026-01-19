@@ -1,5 +1,5 @@
 plugins {
-	id 'io.github.goooler.shadow'
+	id 'com.github.johnrengelman.shadow'
 }
 
 architectury {
@@ -33,6 +33,7 @@ repositories {
 
 dependencies {
 	neoForge "net.neoforged:neoforge:$rootProject.neoforgeVersion"
+	modImplementation "dev.architectury:architectury-neoforge:$rootProject.architecturyVersion"
 
 	common(project(path: ':common', configuration: 'namedElements')) { transitive false }
 	shadowBundle project(path: ':common', configuration: 'transformProductionNeoForge')
