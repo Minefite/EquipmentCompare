@@ -4,8 +4,8 @@
 	"compatibilityLevel": "JAVA_17",
 	"plugin": "com.anthonyhilyard.equipmentcompare.fabric.mixin.MixinConfig",
 	"client": [
-		"JustEnoughItemsRenderHelperMixin",
-		"RoughlyEnoughItemsScreenOverlayImplFabricMixin"
+		//"JustEnoughItemsRenderHelperMixin"//,
+		//"RoughlyEnoughItemsScreenOverlayImplFabricMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

@@ -33,8 +33,10 @@ dependencies {
 	modImplementation "net.fabricmc.fabric-api:fabric-api:$rootProject.fabricVersion"
 	modImplementation "dev.architectury:architectury-fabric:$rootProject.architecturyVersion"
 
-	modImplementation "curse.maven:roughlyenoughitems-310111:4622769"
-	modImplementation "curse.maven:justenoughitems-238222:5563690"
+	//modImplementation "maven.modrinth:rei:17.0.807+fabric"
+	//modImplementation "curse.maven:justenoughitems-238222:5563690"
+
+	modImplementation "maven.modrinth:cloth-config:16.0.143+fabric"
 
 	common(project(path: ':common', configuration: 'namedElements')) { transitive false }
 	shadowBundle project(path: ':common', configuration: 'transformProductionFabric')
